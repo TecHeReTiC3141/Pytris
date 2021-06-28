@@ -1,2 +1,2 @@
 # Pytris
-Pytris is a game based on famous Tetris. It is made with pygame.
+Pytris is a game based on famous Tetris. It is made with pygame and numpy a bit.
