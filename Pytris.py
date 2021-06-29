@@ -23,7 +23,11 @@ class Pytris:
 
     def draw_object(self):
         for seg in self.segments:
-            pygame.draw.rect(display, self.color, (seg[0], seg[1], 50, 50))
+            pygame.draw.rect(display, self.color, (seg[0][0], seg[1][0], 50, 50))
+        if self.chosen:
+            pygame.draw.rect(display, (200, 200, 200), (self.segments[:, 0].min() - 5, self.segments[:, 1].min() - 5,
+                                                        self.segments[:, 0].max() - self.segments[:, 0].min() + 10,
+                                                        self.segments[:, 1].max() - self.segments[:, 1].min() + 10), 2)
 
 
 def generate():
@@ -31,13 +35,31 @@ def generate():
     x = random.randrange(50, 700, 50)
     generator_key = random.randint(1, 4)
     if generator_key == 1:
-        seg = np.array([[x, y], [x + 50, y], [x + 50, y + 50], [x, y + 50]])
+        '''
+        # #
+        # #
+        '''
+        seg = np.array([[list(range(x, x + 50)), list(range(y, y + 50))], [list(range(x + 50, x + 100)), list(range(y, y + 50))],
+                        [list(range(x + 50, x + 100)), list(range(y + 50, y + 100))], [list(range(x, x + 50)), list(range(y + 50, y + 100))]])
     elif generator_key == 2:
-        seg = np.array([[x, y], [x + 50, y], [x + 50, y - 50], [x, y + 50]])
+        '''
+          #
+        # #
+        #'''
+        seg = np.array([[list(range(x, x + 50)), list(range(y, y + 50))], [list(range(x + 50, x + 100)), list(range(y, y + 50))],
+                        [list(range(x + 50, x + 100)), list(range(y - 50, y))], [list(range(x, x + 50)), list(range(y + 50, y + 100))]])
     elif generator_key == 3:
-        seg = np.array([[x, y], [x, y + 50], [x, y + 100], [x, y + 150]])
+        '''
+        #
+        #
+        #
+        #'''
+        seg = np.array([[list(range(x, x + 50)), list(range(y, y + 50))], [list(range(x, x + 50)), list(range(y + 50, y + 100))],
+                        [list(range(x, x + 50)), list(range(y + 100, y + 150))], [list(range(x, x + 50)), list(range(y + 150, y + 200))]])
     else:
-        seg = np.array([[x, y], [x + 50, y], [x + 100, y], [x + 150, y]])
+        '''# # # #'''
+        seg = np.array([[list(range(x, x + 50)), list(range(y, y + 50))], [list(range(x + 50, x + 100)), list(range(y, y + 50))],
+                        [list(range(x + 100, x + 150)), list(range(y, y + 50))], [list(range(x + 150, x + 200)), list(range(y, y + 50))]])
     pytris_list.append(Pytris(seg, (random.randint(1, 255), random.randint(1, 255), random.randint(1, 255))))
 
 
@@ -46,6 +68,14 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            for pytr in pytris_list:
+                for i in pytr.segments:
+                    if event.pos[0] in i[0] and event.pos[1] in i[1]:
+                        for p in pytris_list:
+                            p.chosen = False
+                        pytr.chosen = True
+                        break
 
     display.fill((10, 10, 10))
     pygame.draw.rect(display, (200, 200, 200), (50, 100, 700, 600), 5)
