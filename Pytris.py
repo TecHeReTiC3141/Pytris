@@ -1,8 +1,10 @@
-import pygame, random, numpy as np
+import numpy as np
+import pygame
+import random
 
 pygame.init()
 
-display = pygame.display.set_mode((1000, 750))
+display = pygame.display.set_mode((1200, 750))
 pygame.display.set_caption('Pytris')
 title_font = pygame.font.Font(None, 86)
 clock = pygame.time.Clock()
@@ -85,15 +87,28 @@ while True:
                         selected = pytr
                         break
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a and selected and selected.parametres[0] > 50 and selected.falling:
+            left, right = True, True
+            for seg in selected.segments:
+                left_seg, right_seg = seg.copy(), seg.copy()
+                right_seg[0, :] += 50
+                left_seg[0, :] -= 50
+                for fall in fallen_pytris:
+                    if (left_seg == fall).all():
+                        left = False
+                    if (right_seg == fall).all():
+                        right = False
+
+            if event.key == pygame.K_a and selected and selected.parametres[0] > 50 and selected.falling and left:
                 selected.parametres[0] -= 50
                 selected.segments[:, 0] -= 50
-            elif event.key == pygame.K_d and selected and selected.parametres[0] + selected.parametres[2] < 700 and selected.falling:
+            elif event.key == pygame.K_d and selected and selected.parametres[0] + selected.parametres[2] < 700 and selected.falling and right:
                 selected.parametres[0] += 50
                 selected.segments[:, 0] += 50
 
     display.fill((10, 10, 10))
-    pygame.draw.rect(display, (200, 200, 200), (50, 100, 700, 600), 5)
+    pygame.draw.rect(display, (200, 200, 200), (50, 100, 700, 600), 5, border_radius=5)
+    pygame.draw.rect(display, (200, 200, 200), (800, 150, 300, 350), 5, border_radius=5)
+
 
     for pyt in pytris_list:
         pyt.draw_object()
@@ -104,26 +119,28 @@ while True:
                 pyt.fly()
             if pyt.parametres[1] + pyt.parametres[3] + 1 >= 700:
                 pyt.falling = False
-                fallen_pytris.append(pyt.segments)
+                fallen_pytris.extend(pyt.segments)
                 continue
 
             for seg in pyt.segments:
                 lower_seg = seg.copy()
                 lower_seg[1, :] += 50
                 for fall in fallen_pytris:
-                    for i in fall:
-                        if (lower_seg == i).all():
-                            pyt.falling = False
-                            pyt.chosen = False
-                            fallen_pytris.append(pyt.segments)
-                            break
-                    if not pyt.falling:
+                    if (lower_seg == fall).all():
+                        pyt.falling = False
+                        pyt.chosen = False
+                        fallen_pytris.extend(pyt.segments)
                         break
                 if not pyt.falling:
                     break
-    pygame.draw.rect(display, (10, 10, 10), (50, 0, 700, 100))
-    pygame.draw.rect(display, (10, 10, 10), (50, 700, 700, 100))
+
+    pygame.draw.rect(display, (10, 10, 10), (50, 0, 1250, 100))
+    pygame.draw.rect(display, (10, 10, 10), (50, 700, 1250, 100))
     display.blit(title_font.render('Pytris', True, (200, 200, 200)), (50, 25))
+    display.blit(title_font.render('P', True, (33, 53, 240)), (50, 25))
+    display.blit(title_font.render('y', True, (238, 227, 32)), (89, 25))
+    display.blit(title_font.render('Score:', True, (200, 200, 200)), (820, 170))
+    pygame.draw.rect(display, (50, 150, 143), (45, 75, 185, 8), border_radius=5)
     pygame.display.update()
     clock.tick(60)
 
